@@ -21,8 +21,9 @@ class Client {
     // @TODO: Add errors and warnings for missing info
   }
 
-  async fetch (query, select, isPreview) {
+  async fetch (query, select, opts={}) {
     const { space, key, previewKey, env } = this.config
+    const { isPreview, verbose } = opts
     const actualKey = isPreview ? previewKey : key
     const { content_type, skip = 0, limit } = query
 
@@ -48,9 +49,6 @@ class Client {
     aggregated.limit = limit || aggregated.total
     aggregated.skip = skip || aggregated.skip
 
-    console.log('agg', aggregated)
-    console.log('pages', pages)
-
     // loop through all the pages and get everything
     for (let i = 0; i < pages; i++) {
       // total = 100
@@ -64,23 +62,24 @@ class Client {
       const ret = await cda(`${url}&limit=${tempLimit}&skip=${tempSkip}`)
       aggregated.items.push(...ret.items)
     }
+
+    console.log('aggregated', aggregated)
     
     // finally, get the selected stuff with graphql
-    const graphStr = `
-    query {
-      ${content_type}Collection(preview: ${isPreview ? 'true' : 'false'}, where: {
+    const queryName = `${content_type}Collection`
+    const graphStr = `query {
+      ${queryName}(preview: ${isPreview ? 'true' : 'false'}, where: {
         sys: {
           id_in: [${aggregated.items.map(e => JSON.stringify(e.sys.id))}]
         }
       }) {
         items ${select}
       }
-    }
-    `
-    console.log('query', graphStr)
+    }`
+
     const all = await graphql(`https://graphql.contentful.com/content/v1/spaces/${space}/environments/${env}`, actualKey, graphStr)
 
-    return all
+    return verbose ? all : all.data[queryName].items
   }
 }
 

@@ -7,7 +7,6 @@ const fetch = require('node-fetch')
  * @returns 
  */
  module.exports.cda = async (url = '', opts = {}) => {
-  console.log('url', url)
   const res = await fetch(url, opts).then(r => r.json())
   return res
 }
