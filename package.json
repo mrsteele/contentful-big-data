@@ -1,0 +1,34 @@
+{
+  "name": "contentful-big-data",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Use Contentful's CDA and GraphQL to do big queries",
+  "scripts": {
+    "test": "node src/test",
+    "lint": "standard"
+  },
+  "exports": "./src/index.js",
+  "files": [
+    "src",
+    "*.md"
+  ],
+  "engines": {
+    "node": " >=14.13.1 || >=16.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mrsteele/contentful-big-data.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/mrsteele/contentful-big-data/issues"
+  },
+  "homepage": "https://github.com/mrsteele/contentful-big-data#readme",
+  "dependencies": {
+    "node-fetch": "^3.2.10"
+  },
+  "devDependencies": {
+    "standard": "^17.0.0"
+  }
+}
