@@ -35,7 +35,7 @@ describe('utils', () => {
     })
 
     test('regular request', async () => {
-      const res = await cda('test')
+      const res = await cda()
       expect(res.limit).toBe(100)
       expect(res.skip).toBe(0)
       expect(res.total).toBe(5000)
@@ -44,7 +44,7 @@ describe('utils', () => {
     })
 
     test('limited request', async () => {
-      const res = await cda('test?limit=5')
+      const res = await cda({ limit: 5 })
       expect(res.limit).toBe(5)
       expect(res.skip).toBe(0)
       expect(res.total).toBe(5000)
@@ -53,7 +53,7 @@ describe('utils', () => {
     })
 
     test('skip request', async () => {
-      const res = await cda('test?skip=5')
+      const res = await cda({ skip: 5 })
       expect(res.limit).toBe(100)
       expect(res.skip).toBe(5)
       expect(res.total).toBe(5000)
@@ -62,39 +62,41 @@ describe('utils', () => {
     })
 
     test('skip (edge case)', async () => {
-      const start = 4990
-      const res = await cda(`test?skip=${start}`)
+      const skip = 4990
+      const res = await cda({ skip })
       expect(res.limit).toBe(100)
-      expect(res.skip).toBe(start)
+      expect(res.skip).toBe(skip)
       expect(res.total).toBe(5000)
       expect(res.items.length).toBe(10)
-      expect(res.items[0].fields.index).toBe(start)
+      expect(res.items[0].fields.index).toBe(skip)
     })
 
     test('skip and limit', async () => {
-      const start = 4990
+      const skip = 4990
       const limit = 50
-      const res = await cda(`test?skip=${start}&limit=${limit}`)
+      const res = await cda({ skip, limit })
       expect(res.limit).toBe(limit)
-      expect(res.skip).toBe(start)
+      expect(res.skip).toBe(skip)
       expect(res.total).toBe(5000)
       expect(res.items.length).toBe(10)
-      expect(res.items[0].fields.index).toBe(start)
+      expect(res.items[0].fields.index).toBe(skip)
     })
 
     test('skip and limit (edge case)', async () => {
-      const start = 5
+      const skip = 5
       const limit = 5
-      const res = await cda(`test?skip=${start}&limit=${limit}`)
+      const res = await cda({ skip, limit })
       expect(res.limit).toBe(limit)
-      expect(res.skip).toBe(start)
+      expect(res.skip).toBe(skip)
       expect(res.total).toBe(5000)
       expect(res.items.length).toBe(limit)
-      expect(res.items[0].fields.index).toBe(start)
+      expect(res.items[0].fields.index).toBe(skip)
     })
   })
   
-  test('graphql', () => {
-    
+  describe('graphql', () => {
+    // test('default response', async () => {
+    //   const res = await graphql('')
+    // })
   })
 })

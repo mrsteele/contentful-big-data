@@ -36,10 +36,19 @@ class Client {
     const queryStr = Object.keys(query).filter(key => !CDA_FILTER.includes(key)).map(key => `${key}=${query[key]}`).join('&')
     
     // get your "common" url
-    const url = `https://${isPreview ? 'preview' : 'cdn'}.contentful.com/spaces/${space}/environments/${env}/entries?access_token=${actualKey}&select=sys.id&include=0&${queryStr}`
+    const commonProps = {
+      select: 'sys.id',
+      include: 0
+    }
+    const commonOpts = {
+      isPreview,
+      space,
+      env,
+      key: isPreview ? previewKey : key
+    }
 
     // figure out how many pages you need
-    const aggregated = await cda(`${url}&limit=0`)
+    const aggregated = await cda({...commonProps, limit: 0}, commonOpts)
     const { total } = aggregated
     // remove skip to offset the pages
     const pages =  getPages({ max: CDA_MAX, total, skip, limit })
@@ -59,7 +68,7 @@ class Client {
       // 3: limit = 8, skip = 20
       const tempSkip = skip + (i * CDA_MAX)
       const tempLimit = limit && aggregated.items.length + CDA_MAX > limit ? limit - aggregated.items.length : CDA_MAX
-      const ret = await cda(`${url}&limit=${tempLimit}&skip=${tempSkip}`)
+      const ret = await cda({ ...commonProps, limit: tempLimit, skip: tempSkip}, commonOpts)
       aggregated.items.push(...ret.items)
     }
 
@@ -77,7 +86,7 @@ class Client {
       }
     }`
 
-    const all = await graphql(`https://graphql.contentful.com/content/v1/spaces/${space}/environments/${env}`, actualKey, graphStr)
+    const all = await graphql(graphStr, commonOpts)
 
     return verbose ? all : all.data[queryName].items
   }

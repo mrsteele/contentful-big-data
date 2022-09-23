@@ -6,8 +6,10 @@ const fetch = require('node-fetch')
  * @param {Object} opts The individual options (passed to fetch)
  * @returns 
  */
- module.exports.cda = async (url = '', opts = {}) => {
-  const res = await fetch(url, opts).then(r => r.json())
+ module.exports.cda = async (params={}, opts = {}) => {
+  const { isPreview, space, env, key } = opts
+  const queryStr = Object.keys(params).map(key => `${key}=${params[key]}`).join('&')
+  const res = await fetch(`https://${isPreview ? 'preview' : 'cdn'}.contentful.com/spaces/${space}/environments/${env}/entries?access_token=${key}&${queryStr}`).then(r => r.json())
   return res
 }
 
@@ -17,8 +19,9 @@ const fetch = require('node-fetch')
  * @param {String} query The query string (GraphQL)
  * @returns 
  */
-module.exports.graphql = async (url, key, query) => {
-  const res = await fetch(url, {
+module.exports.graphql = async (query='', opts={}) => {
+  const { key, space, env } = opts
+  const res = await fetch(`https://graphql.contentful.com/content/v1/spaces/${space}/environments/${env}`, {
     method: 'POST',
     headers: {
       "Content-Type": 'application/json',
