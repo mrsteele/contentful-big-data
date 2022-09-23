@@ -58,8 +58,9 @@ class Client {
     // @TODO: Add errors and warnings for missing info
   }
 
-  async fetch (query, select) {
+  async fetch (query, select, isPreview) {
     const { space, key, previewKey, env } = this.config
+    const actualKey = isPreview ? previewKey : key
 
     // Error handlings
     if (!query.content_type) {
@@ -70,7 +71,7 @@ class Client {
     const queryStr = Object.keys(query).filter(key => !CDA_FILTER.includes(key)).map(key => `${key}=${query[key]}`).join('&')
     
     // get your "common" url
-    const url = `https://cdn.contentful.com/spaces/${space}/environments/${env}/entries?access_token=${key}&select=sys.id&include=0&${queryStr}`
+    const url = `https://${isPreview ? 'preview' : 'cdn'}.contentful.com/spaces/${space}/environments/${env}/entries?access_token=${actualKey}&select=sys.id&include=0&${queryStr}`
 
     // figure out how many pages you need
     const aggregated = await cda(`${url}&limit=0`)
@@ -93,7 +94,7 @@ class Client {
     // finally, get the selected stuff with graphql
     const graphStr = `
     query {
-      ${query.content_type}Collection(where: {
+      ${query.content_type}Collection(preview: ${isPreview ? 'true' : 'false'}, where: {
         sys: {
           id_in: [${aggregated.items.map(e => JSON.stringify(e.sys.id))}]
         }
@@ -103,7 +104,7 @@ class Client {
     }
     `
     console.log('query', graphStr)
-    const all = await graphql(`https://graphql.contentful.com/content/v1/spaces/${space}/environments/${env}`, key, graphStr)
+    const all = await graphql(`https://graphql.contentful.com/content/v1/spaces/${space}/environments/${env}`, actualKey, graphStr)
 
     return all
   }
