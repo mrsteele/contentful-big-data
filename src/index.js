@@ -37,7 +37,8 @@ class Client {
     
     // get your "common" url
     const commonProps = {
-      select: 'sys.id',
+      content_type,
+      select: 'sys',
       include: 0
     }
     const commonOpts = {
