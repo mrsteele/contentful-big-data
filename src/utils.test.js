@@ -95,8 +95,23 @@ describe('utils', () => {
   })
   
   describe('graphql', () => {
-    // test('default response', async () => {
-    //   const res = await graphql('')
-    // })
+    test('default response', async () => {
+      const query = `query {
+        pageCollection(where: {
+          sys: {
+            id_in: ["abc123"]
+          }
+        }) {
+          items {
+            title
+          }
+        }
+      }`
+      const res = await graphql({
+        body: JSON.stringify({ query })
+      })
+
+      expect(res.data.pageCollection.items.length).toBe(1)
+    })
   })
 })

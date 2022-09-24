@@ -18,11 +18,25 @@ const normalizedResponse = (ret) => Promise.resolve({
   json: () => ret
 })
 
-module.exports = (url) => {
+module.exports = (url, opts={}) => {
   const isGraphql = url.includes('graph')
 
   if (isGraphql) {
-    // ...
+    const query = JSON.parse(opts.body).query.body
+    const name = query.split('Collection')[0].split(' ').pop() + 'Collection'
+    const stuff = query.split('[')[1].split(']')[0].split('\\"').join('"')
+    const ids = JSON.parse(`[${stuff}]`)
+
+    // data[queryName].items
+    return normalizedResponse({
+      data: {
+        [name]: {
+          items: ids.map(ids => ({
+            title: ids
+          }))
+        }
+      }
+    })
   } else {
     const queryStr = url.split('?')[1]
     const params = !queryStr ? {} : queryStr.split('&').reduce((all, current) => {

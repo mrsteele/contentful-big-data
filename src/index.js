@@ -24,23 +24,20 @@ class Client {
   async fetch (query, select, opts={}) {
     const { space, key, previewKey, env } = this.config
     const { isPreview, verbose } = opts
-    const actualKey = isPreview ? previewKey : key
     const { content_type, skip = 0, limit } = query
 
     // Error handlings
     if (!content_type) {
       throw new Error('The "content_type" property is required.')
     }
-
-    // convert the query to a string (with some "cleaning")
-    const queryStr = Object.keys(query).filter(key => !CDA_FILTER.includes(key)).map(key => `${key}=${query[key]}`).join('&')
     
     // get your "common" url
     const commonProps = {
       content_type,
-      select: 'sys',
+      select: 'sys.id',
       include: 0
     }
+  
     const commonOpts = {
       isPreview,
       space,
