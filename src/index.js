@@ -3,11 +3,6 @@ const { cda, graphql, getPages } = require("./utils")
 // some globals
 // limit from Contentful
 const CDA_MAX = 1000
-const CDA_FILTER = [
-  'select', // only select IDs, select is powered by GraphQL
-  'skip', // manage the skip from the total
-  'limit' // always grab all of it
-]
 
 class Client {
   constructor (config={}) {
@@ -24,7 +19,8 @@ class Client {
   async fetch (query, select, opts={}) {
     const { space, key, previewKey, env } = this.config
     const { isPreview, verbose } = opts
-    const { content_type, skip = 0, limit } = query
+    // pull out select (not used here)
+    const { content_type, skip = 0, limit, ...rest } = query
 
     // Error handlings
     if (!content_type) {
@@ -33,9 +29,10 @@ class Client {
     
     // get your "common" url
     const commonProps = {
+      ...rest, // support your custom query
       content_type,
-      select: 'sys.id',
-      include: 0
+      select: 'sys.id', // only need the ids
+      include: 0 // only need the root entry
     }
   
     const commonOpts = {
@@ -93,3 +90,5 @@ class Client {
 module.exports = (config = {}) => {
   return new Client(config)
 }
+
+module.exports.CBD = Client
