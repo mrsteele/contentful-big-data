@@ -22,7 +22,8 @@ module.exports = (url, opts={}) => {
   const isGraphql = url.includes('graph')
 
   if (isGraphql) {
-    const query = JSON.parse(opts.body).query.body
+    const theQuery = JSON.parse(opts.body).query
+    const query = theQuery.replace(/\s/g, ' ')
     const name = query.split('Collection')[0].split(' ').pop() + 'Collection'
     const stuff = query.split('[')[1].split(']')[0].split('\\"').join('"')
     const ids = JSON.parse(`[${stuff}]`)
@@ -46,7 +47,8 @@ module.exports = (url, opts={}) => {
     }, {})
 
     const skip = parseInt(params.skip) || 0
-    const limit = parseInt(params.limit) || 100
+    // this got annoying because parseInt('0') always evaluates false...
+    const limit = parseInt(params.limit) || (params.limit ? 0 : 100)
 
     return normalizedResponse({
       total: db.length,

@@ -20,7 +20,7 @@ class Client {
     const { space, key, previewKey, env } = this.config
     const { isPreview, verbose } = opts
     // pull out select (not used here)
-    const { content_type, skip = 0, limit, ...rest } = query
+    const { content_type, skip = 0, limit = 0, ...queryRest } = query
 
     // Error handlings
     if (!content_type) {
@@ -29,7 +29,8 @@ class Client {
     
     // get your "common" url
     const commonProps = {
-      ...rest, // support your custom query
+      // skip, limit were destructed out
+      ...queryRest,
       content_type,
       select: 'sys.id', // only need the ids
       include: 0 // only need the root entry
@@ -43,6 +44,7 @@ class Client {
     }
 
     // figure out how many pages you need
+    // @TODO - Try to use this as page 1
     const aggregated = await cda({...commonProps, limit: 0}, commonOpts)
     const { total } = aggregated
     // remove skip to offset the pages
@@ -67,7 +69,7 @@ class Client {
       aggregated.items.push(...ret.items)
     }
 
-    console.log('aggregated', aggregated)
+    // console.log('aggregated', aggregated)
     
     // finally, get the selected stuff with graphql
     const queryName = `${content_type}Collection`

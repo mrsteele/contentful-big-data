@@ -107,9 +107,7 @@ describe('utils', () => {
           }
         }
       }`
-      const res = await graphql({
-        body: JSON.stringify({ query })
-      })
+      const res = await graphql(query, {})
 
       expect(res.data.pageCollection.items.length).toBe(1)
     })

@@ -1,39 +1,51 @@
 const CBD = require('.')
 
 describe('CBD', () => {
-  test('Client', () => {
-    const cbd = CBD({})
-    expect(cbd instanceof CBD.CBD).toBe(true)
+  describe('constructor', () => {
+    test('default', () => {
+      expect(typeof CBD).toBe('function');
+    })
+
+    test('default instance', () => {
+      const cbd = CBD({})
+      expect(cbd instanceof CBD.CBD).toBe(true)
+    })
+
+    test('constructor results', () => {
+      expect(CBD({}).constructor.name).toBe('Client')
+    })
   })
-})
 
-describe('index:fetch', () => {
-  test('default', async () => {
+
+  // test('missing requirements', () => {
+
+  // })
+
+  describe('fetch', () => {
     const cbd = CBD({})
-    const results = await cbd.fetch({}, `{
-      title
-    }`)
-    expect(results.length).toBe(1);
-  })
-  test('missing content_type', async () => {
-    const cbd = CBD({})
-    await expect(cbd.fetch({}, `{ title }`)).rejects.toThrow('The "content_type" property is required.')
 
+    test('default', async () => {
+      const results = await cbd.fetch({ content_type: 't', limit: 1 }, `{
+        title
+      }`)
+      expect(results.length).toBe(1);
+    })
+  
+    test('missing content_type', async () => {
+      await expect(cbd.fetch({ not_content_type: 't' }, `{ title }`)).rejects.toThrow('The "content_type" property is required.')
+    })
 
+    // test('honors limits < 100', async () => {
+    //   const query = {
+    //     content_type: 'test',
+    //     limit: 5
+    //   }
 
-    // try {
-    //   console.log('try')
-    //   const results = await cbd.fetch({}, `{
+    //   const res = await cbd.fetch(query, `{
     //     title
     //   }`)
 
-    //   // we have a problem...
-    //   expect(true).toBe(false)
-    // } catch (err) {
-    //   console.log('fail')
-    //   console.log(err.message)
-    //   expect(1).toBe(1)
-    //   // expect(err.message).toBe();
-    // }
+    //   expect(res.length).toBe(query.limit)
+    // })
   })
 })
