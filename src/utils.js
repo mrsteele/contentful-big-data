@@ -4,9 +4,9 @@ const fetch = require('node-fetch')
  * Makes a CDA request to contentful
  * @param {String} url - The URL for the request
  * @param {Object} opts The individual options (passed to fetch)
- * @returns 
+ * @returns
  */
- module.exports.cda = async (params={}, opts = {}) => {
+module.exports.cda = async (params = {}, opts = {}) => {
   const { isPreview, space, env, key } = opts
   const queryStr = Object.keys(params).map(key => `${key}=${params[key]}`).join('&')
   const res = await fetch(`https://${isPreview ? 'preview' : 'cdn'}.contentful.com/spaces/${space}/environments/${env}/entries?access_token=${key}&${queryStr}`).then(r => r.json())
@@ -17,15 +17,15 @@ const fetch = require('node-fetch')
  * Makes a request to Contentful's GraphQL service.
  * @param {String} url The URL to make the request
  * @param {String} query The query string (GraphQL)
- * @returns 
+ * @returns
  */
-module.exports.graphql = async (query='', opts={}) => {
+module.exports.graphql = async (query = '', opts = {}) => {
   const { key, space, env } = opts
   const res = await fetch(`https://graphql.contentful.com/content/v1/spaces/${space}/environments/${env}`, {
     method: 'POST',
     headers: {
-      "Content-Type": 'application/json',
-      "Authorization": `Bearer ${key}`
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${key}`
     },
     body: JSON.stringify({ query })
   }).then(r => r.json())
@@ -33,10 +33,10 @@ module.exports.graphql = async (query='', opts={}) => {
   return res
 }
 
-module.exports.getPages = ({ skip=0, limit, total, max }) => {
+module.exports.getPages = ({ skip = 0, limit, total, max }) => {
   // evaluated total (remove skip from total)
   const evalTotal = total - skip
-  // if less than 0, make it 0 
+  // if less than 0, make it 0
   const realTotal = evalTotal > 0 ? evalTotal : 0
   // if realTotal is more than limit, use limit
   const resultSize = limit && realTotal > limit ? limit : realTotal
@@ -46,6 +46,6 @@ module.exports.getPages = ({ skip=0, limit, total, max }) => {
 /**
  * Converts the name to the GraphQL name.
  * @param {String} name The name to convert.
- * @returns 
+ * @returns
  */
 module.exports.convertTypeToGraph = (name) => `${name.charAt(0).toUpperCase()}${name.slice(1)}`

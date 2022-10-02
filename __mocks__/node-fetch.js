@@ -7,7 +7,7 @@
 
 const createRandomStr = () => (Math.random() + 1).toString(36).substring(12)
 const createRandomCdaEntry = (index) => ({
-  sys: { id: createRandomStr()},
+  sys: { id: createRandomStr() },
   fields: { index }
 })
 
@@ -18,7 +18,7 @@ const normalizedResponse = (ret) => Promise.resolve({
   json: () => ret
 })
 
-module.exports = (url, opts={}) => {
+module.exports = (url, opts = {}) => {
   const isGraphql = url.includes('graph')
 
   if (isGraphql) {
@@ -40,11 +40,13 @@ module.exports = (url, opts={}) => {
     })
   } else {
     const queryStr = url.split('?')[1]
-    const params = !queryStr ? {} : queryStr.split('&').reduce((all, current) => {
-      const split = current.split('=')
-      all[split[0]] = split[1]
-      return all
-    }, {})
+    const params = !queryStr
+      ? {}
+      : queryStr.split('&').reduce((all, current) => {
+        const split = current.split('=')
+        all[split[0]] = split[1]
+        return all
+      }, {})
 
     const skip = parseInt(params.skip) || 0
     // this got annoying because parseInt('0') always evaluates false...

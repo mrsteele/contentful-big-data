@@ -1,6 +1,4 @@
 const { convertTypeToGraph, getPages, cda, graphql } = require('./utils')
-const fetch = require('node-fetch')
-
 
 // jest.mock('node-fetch', () => {
 //   return jest.fn().mockImplementation((url) => {
@@ -13,9 +11,9 @@ const fetch = require('node-fetch')
 
 describe('utils', () => {
   test('convertTypeToGraph', () => {
-    expect(convertTypeToGraph('test')).toBe('Test');
+    expect(convertTypeToGraph('test')).toBe('Test')
   })
-  
+
   test('getPages', () => {
     const d = {
       total: 101,
@@ -27,7 +25,7 @@ describe('utils', () => {
     expect(getPages({ ...d, limit: 11, max: 5 })).toBe(3)
     expect(getPages({ ...d, limit: 11, max: 5, skip: 5 })).toBe(3)
   })
-  
+
   describe('cda', () => {
     // let mock
     beforeEach(() => {
@@ -93,7 +91,7 @@ describe('utils', () => {
       expect(res.items[0].fields.index).toBe(skip)
     })
   })
-  
+
   describe('graphql', () => {
     test('default response', async () => {
       const query = `query {

@@ -17,6 +17,9 @@
     "url": "https://github.com/mrsteele/contentful-big-data/issues"
   },
   "homepage": "https://github.com/mrsteele/contentful-big-data#readme",
+  "standard": {
+    "env": [ "jest" ]
+  },
   "dependencies": {
     "node-fetch": "^2.6.7"
   },
