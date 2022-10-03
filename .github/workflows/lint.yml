@@ -5,6 +5,8 @@ jobs:
     name: StandardJs
     runs-on: ubuntu-latest
     steps:
+    - name: Cancel Previous Runs
+      uses: styfle/cancel-workflow-action
     - uses: actions/checkout@master
     - name: StandardJs
       uses: docker://jopereyral/standardjs-action
