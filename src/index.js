@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 const { cda, graphql, getPages } = require('./utils')
 
 // some globals

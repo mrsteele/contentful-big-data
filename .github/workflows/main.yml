@@ -15,5 +15,5 @@ jobs:
       - uses: actions/setup-node@v1
         with:
           node-version: 16.x
-      - run: npm install standard
+      - run: npm i
       - run: npm run lint

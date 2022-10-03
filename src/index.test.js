@@ -9,7 +9,7 @@ const CBDConstructorErrorStr = '"space" and at least "key" or "previewKey" are r
 
 afterEach(() => {
   // restore the spy created with spyOn
-  jest.restoreAllMocks();
+  jest.restoreAllMocks()
 })
 
 describe('CBD', () => {
