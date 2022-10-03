@@ -1,7 +1,7 @@
 # contentful-big-data
 Use Contentful's CDA and GraphQL to do big queries
 
-Badges - Go - Here
+[![npm version](https://badge.fury.io/js/contentful-big-data.svg)](https://badge.fury.io/js/contentful-big-data)
 
 ## About
 
