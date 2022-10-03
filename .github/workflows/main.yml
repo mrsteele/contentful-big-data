@@ -33,15 +33,10 @@ jobs:
           node-version: ${{ matrix.node }}
       - run: npm i
       - run: npm t
-  coverage:
-    needs: test
-    runs-on: ubuntu-latest
-    name: Coverage
-    steps:
       - uses: actions/checkout@master
       - uses: codecov/codecov-action@v3
   deploy:
-    needs: coverage
+    needs: test
     runs-on: ubuntu-latest
     steps:
       - name: Cancel Previous Runs
