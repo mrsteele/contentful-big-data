@@ -1,0 +1,18 @@
+name: Main
+on: push
+
+# TODO - Need to not repeat the checkout and setup node steps...
+
+jobs:
+  # Set the job key. The key is displayed as the job name
+  # when a job name is not provided
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Cancel Previous Runs
+        uses: styfle/cancel-workflow-action@0.10.1
+      - uses: actions/checkout@master
+      - name: StandardJs
+        uses: docker://jopereyral/standardjs-action
+        with:
+          args: --fix
