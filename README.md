@@ -2,6 +2,7 @@
 Use Contentful's CDA and GraphQL to do big queries
 
 [![npm version](https://badge.fury.io/js/contentful-big-data.svg)](https://badge.fury.io/js/contentful-big-data)
+[![codecov](https://codecov.io/gh/mrsteele/contentful-big-data/branch/main/graph/badge.svg?token=MKM3ID7DVP)](https://codecov.io/gh/mrsteele/contentful-big-data)
 
 ## About
 
