@@ -36,7 +36,6 @@ jobs:
   deploy:
     needs: test
     runs-on: ubuntu-latest
-    need: 
     steps:
       - name: Cancel Previous Runs
         uses: styfle/cancel-workflow-action@0.10.1
