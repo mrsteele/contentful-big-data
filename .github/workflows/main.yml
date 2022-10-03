@@ -11,8 +11,9 @@ jobs:
     steps:
       - name: Cancel Previous Runs
         uses: styfle/cancel-workflow-action@0.10.1
-      - uses: actions/checkout@master
-      - name: StandardJs
-        uses: docker://jopereyral/standardjs-action
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
         with:
-          args: --fix
+          node-version: 16.x
+      - run: npm install standard
+      - run: npm run lint
