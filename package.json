@@ -20,6 +20,9 @@
   "standard": {
     "env": [ "jest" ]
   },
+  "release": {
+    "branches": ["main"]
+  },
   "dependencies": {
     "node-fetch": "^2.6.7"
   },
