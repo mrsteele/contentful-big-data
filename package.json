@@ -2,6 +2,7 @@
   "name": "contentful-big-data",
   "version": "1.0.0",
   "description": "Use Contentful's CDA and GraphQL to do big queries",
+  "main": "src/index.js",
   "scripts": {
     "debug": "node src/debug",
     "test": "jest",
