@@ -5,9 +5,8 @@
 `https://graphql.contentful.com/content/v1/spaces/${space}/environments/${env}`
 */
 
-const createRandomStr = () => (Math.random() + 1).toString(36).substring(12)
 const createRandomCdaEntry = (index) => ({
-  sys: { id: createRandomStr() },
+  sys: { id: index },
   fields: { index }
 })
 

@@ -105,6 +105,7 @@ cbd.fetch(filters={}, selectors='', options={})
 * **filters** - Please refer to the [Content Delivery API](https://www.contentful.com/developers/docs/references/content-delivery-api/) to look up all the properties. This library adheres to all of them, but will ignore the `select` property because we opt to use the GraphQL selectors for more granularity. Note that the `content_type` property is required due to limitations with Contentful.
 * **selectors** - Please adhere to the [Contentful GraphQL API](https://www.contentful.com/developers/docs/references/graphql/) to determine how your query should be formatted. We always do a `Collection` request, just wrap your schema in curly braces.
 * **options** - These are ours. Currently we support the following
+  * **isPreview** (Bool) - If `true`, will use the `previewKey` and access the preview API for both the CDA and GraphQL services.
   * **verbose** (Bool) - If `true`, we will return the full GraphQL response object, otherwise we only return the array of results.
 
 ## References

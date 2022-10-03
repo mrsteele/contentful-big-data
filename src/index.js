@@ -13,7 +13,12 @@ class Client {
       previewKey: '',
       ...config
     }
-    // @TODO: Add errors and warnings for missing info
+
+    // basic error handling...
+    const { space, key, previewKey } = this.config
+    if (!space || (!key && !previewKey)) {
+      throw new Error('"space" and at least "key" or "previewKey" are required.')
+    }
   }
 
   async fetch (query, select, opts = {}) {
