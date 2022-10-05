@@ -1,4 +1,7 @@
 # contentful-big-data 🥦
+
+<img width="100" align="right" src="https://user-images.githubusercontent.com/5257284/194174575-ff35d11e-94b1-43a0-a7d4-626432a6f7bc.png" />
+
 Use Contentful's CDA and GraphQL to do big queries
 
 [![npm version](https://badge.fury.io/js/contentful-big-data.svg)](https://badge.fury.io/js/contentful-big-data)
