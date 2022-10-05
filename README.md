@@ -31,7 +31,8 @@ const cbd = CBD({
 })
 
 const results = await cbd.fetch({
-  'fields.author[in]': bigAllAuthorsArray
+  // Regular CDA query parameters (read me here: https://www.contentful.com/developers/docs/references/content-delivery-api/#/reference/search-parameters/inclusion)
+  'fields.author[in]': 'authorid1,authorid2,authorid3'
 }, `{
   name
   image { url }
