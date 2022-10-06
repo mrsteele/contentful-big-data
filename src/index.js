@@ -9,7 +9,6 @@ class Client {
       env: 'master',
       key: '',
       previewKey: '',
-      retry,
       ...config
     }
 
