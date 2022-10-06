@@ -26,7 +26,8 @@ module.exports = (url, opts = {}) => {
     return {
       status: 429,
       headers: {
-        get: () => '300'
+        // just return 1 ms
+        get: () => '1'
       }
     }
   }
