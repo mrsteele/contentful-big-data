@@ -141,6 +141,12 @@ describe('utils', () => {
         await expect(cda({}, { })).rejects.toThrow(failedMsg())
         global.failRate = 0
       })
+
+      test('fail silently', async () => {
+        global.failRate = 1
+        const res = await cda({}, { retry: 0, failSilent: true })
+        expect(res).toStrictEqual({ total: 0, limit: 0, skip: 0, items: [] })
+      })
     })
   })
 
