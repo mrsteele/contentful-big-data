@@ -7,16 +7,17 @@ const fetch = require('node-fetch')
  * @returns
  */
 module.exports.cda = async (params = {}, opts = {}) => {
-  const { isPreview, space, env, key, retry=3, failSilent } = opts
+  const { isPreview, space, env, key, retry, failSilent } = opts
   const queryStr = Object.keys(params).map(key => `${key}=${params[key]}`).join('&')
   for (let i = 0; i < retry; i++) {
-    const res = await fetch(`https://${isPreview ? 'preview' : 'cdn'}.contentful.com/spaces/${space}/environments/${env}/entries?access_token=${key}&${queryStr}`).then(r => {
-      if (r.status === 429) {
-
-      }
-      r.json()
-    })
-    return res
+    const r = await fetch(`https://${isPreview ? 'preview' : 'cdn'}.contentful.com/spaces/${space}/environments/${env}/entries?access_token=${key}&${queryStr}`)
+    if (r.status === 429) {
+      // fallback to 200 ms
+      const wait = parseInt(r.headers.get('x-contentful-ratelimit-reset')) || 200
+      await new Promise(resolve => setTimeout(resolve, wait + 1))
+    } else {
+      return r.json()
+    }
   }
 
   // never worked, fail

@@ -24,10 +24,11 @@ import CBD from 'contentful-big-data'
 // const CBD = require('contentful-big-data')
 
 const cbd = CBD({
-  space: 'space-id-here',
-  key: 'space-key-here',
-  previewKey: 'preview-key-here',
-  env: 'env' // (defaults to 'master')
+  space: 'space-id-here', // (required)
+  key: 'space-key-here', // (possibly required)
+  previewKey: 'preview-key-here', // (possibly required)
+  env: 'env', // (optional, defaults to 'master')
+  retry: 3 //  (optional, defaults to 3)
 })
 
 const results = await cbd.fetch({
@@ -57,8 +58,8 @@ Because of these limitations, this library has been created to satisfy these sho
 
 * **Multi-Query** - The concept revolves around making a CDA request with `limit=0` with the purpose of getting the count of results. This tells us how many additional requests are needed to complete the dataset.
 * **Multi-Service** - Instead of using the CDN or GraphQL, **use both**. The CDN is great for requesting all the IDs, and the GraphQL is useful for limiting the response size.
+* **Retry-Oriented** - Sometimes you hit a limit with Contentful. This could be from the size of the response, or because you hit the rate limiter. If that happens we should adjust where appropriate and try again.
 * **Size-Aware** - There are limitations on both the request and response sizes. We should break apart requests that are too large, and dynamically respond if we get a reponse too large error from Contentful. *(coming soon)*
-* **Retry-Oriented** - Sometimes you hit a limit with Contentful. This could be from the size of the response, or because you hit the rate limiter. If that happens we should adjust where appropriate and try again. *(coming soon)*
 
 ## Examples
 
@@ -107,6 +108,7 @@ cbd.fetch(filters={}, selectors='', options={})
 * **selectors** - Please adhere to the [Contentful GraphQL API](https://www.contentful.com/developers/docs/references/graphql/) to determine how your query should be formatted. We always do a `Collection` request, just wrap your schema in curly braces.
 * **options** - These are ours. Currently we support the following
   * **isPreview** (Bool) - If `true`, will use the `previewKey` and access the preview API for both the CDA and GraphQL services.
+  * **retry** (Number) - If set, this number will be used at retry attempts.
   * **verbose** (Bool) - If `true`, we will return the full GraphQL response object, otherwise we only return the array of results.
 
 ## References

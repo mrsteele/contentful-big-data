@@ -12,6 +12,7 @@ class Client {
       env: 'master',
       key: '',
       previewKey: '',
+      retry: 3,
       ...config
     }
 
@@ -23,8 +24,8 @@ class Client {
   }
 
   async fetch (query, select, opts = {}) {
-    const { space, key, previewKey, env } = this.config
-    const { isPreview, verbose } = opts
+    const { space, key, previewKey, env, retry } = this.config
+    const { isPreview, verbose, retry: retryOpts } = opts
     // pull out select (not used here)
     const { content_type, skip = 0, limit = 0, ...queryRest } = query
 
@@ -39,14 +40,16 @@ class Client {
       ...queryRest,
       content_type,
       select: 'sys.id', // only need the ids
-      include: 0 // only need the root entry
+      include: 0, // only need the root entry
+      retry: retryOpts ?? retry
     }
 
     const commonOpts = {
       isPreview,
       space,
       env,
-      key: isPreview ? previewKey : key
+      key: isPreview ? previewKey : key,
+      retry
     }
 
     // figure out how many pages you need
@@ -74,8 +77,6 @@ class Client {
       const ret = await cda({ ...commonProps, limit: tempLimit, skip: tempSkip }, commonOpts)
       aggregated.items.push(...ret.items)
     }
-
-    // console.log('aggregated', aggregated)
 
     // finally, get the selected stuff with graphql
     const queryName = `${content_type}Collection`
