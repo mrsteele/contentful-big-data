@@ -8,7 +8,7 @@ const CONFIG = require('./config')
  * @returns
  */
 module.exports.cda = async (params = {}, opts = {}) => {
-  const { isPreview, space, env, key, retry=CONFIG.retry, failSilent } = opts
+  const { isPreview, space, env, key, retry = CONFIG.retry, failSilent } = opts
   const queryStr = Object.keys(params).map(key => `${key}=${params[key]}`).join('&')
   for (let i = 0; i <= retry; i++) {
     const r = await fetch(`https://${isPreview ? 'preview' : 'cdn'}.contentful.com/spaces/${space}/environments/${env}/entries?access_token=${key}&${queryStr}`)

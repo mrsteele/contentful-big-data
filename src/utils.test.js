@@ -141,7 +141,6 @@ describe('utils', () => {
         await expect(cda({}, { })).rejects.toThrow(failedMsg())
         global.failRate = 0
       })
-
     })
   })
 
