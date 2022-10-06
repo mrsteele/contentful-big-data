@@ -9,7 +9,7 @@ class Client {
       env: 'master',
       key: '',
       previewKey: '',
-      retry: CONFIG.retry,
+      retry,
       ...config
     }
 
