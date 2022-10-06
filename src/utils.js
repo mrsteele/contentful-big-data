@@ -7,10 +7,29 @@ const fetch = require('node-fetch')
  * @returns
  */
 module.exports.cda = async (params = {}, opts = {}) => {
-  const { isPreview, space, env, key } = opts
+  const { isPreview, space, env, key, retry=3, failSilent } = opts
   const queryStr = Object.keys(params).map(key => `${key}=${params[key]}`).join('&')
-  const res = await fetch(`https://${isPreview ? 'preview' : 'cdn'}.contentful.com/spaces/${space}/environments/${env}/entries?access_token=${key}&${queryStr}`).then(r => r.json())
-  return res
+  for (let i = 0; i < retry; i++) {
+    const res = await fetch(`https://${isPreview ? 'preview' : 'cdn'}.contentful.com/spaces/${space}/environments/${env}/entries?access_token=${key}&${queryStr}`).then(r => {
+      if (r.status === 429) {
+
+      }
+      r.json()
+    })
+    return res
+  }
+
+  // never worked, fail
+  if (failSilent) {
+    return {
+      total: 0,
+      limit: 0,
+      skip: 0,
+      items: []
+    }
+  }
+
+  throw new Error(`Contentful CDA unreachable after ${retry} retries. Please check your internet connection or the Contentful status page.`)
 }
 
 /**
