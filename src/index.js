@@ -1,9 +1,6 @@
 /* eslint-disable camelcase */
 const { cda, graphql, getPages } = require('./utils')
-
-// some globals
-// limit from Contentful
-const CDA_MAX = 1000
+const CONFIG = require('./config')
 
 class Client {
   constructor (config = {}) {
@@ -12,7 +9,7 @@ class Client {
       env: 'master',
       key: '',
       previewKey: '',
-      retry: 3,
+      retry: CONFIG.retry,
       ...config
     }
 
@@ -57,7 +54,7 @@ class Client {
     const aggregated = await cda({ ...commonProps, limit: 0 }, commonOpts)
     const { total } = aggregated
     // remove skip to offset the pages
-    const pages = getPages({ max: CDA_MAX, total, skip, limit })
+    const pages = getPages({ max: CONFIG.cdaMax, total, skip, limit })
 
     // setup the paginated placeholder
     // weird hack to just make it look correct
@@ -72,8 +69,8 @@ class Client {
       // 1: limit = 20
       // 2: limit = 20, skip = 20
       // 3: limit = 8, skip = 20
-      const tempSkip = skip + (i * CDA_MAX)
-      const tempLimit = limit && aggregated.items.length + CDA_MAX > limit ? limit - aggregated.items.length : CDA_MAX
+      const tempSkip = skip + (i * CONFIG.cdaMax)
+      const tempLimit = limit && aggregated.items.length + CONFIG.cdaMax > limit ? limit - aggregated.items.length : CONFIG.cdaMax
       const ret = await cda({ ...commonProps, limit: tempLimit, skip: tempSkip }, commonOpts)
       aggregated.items.push(...ret.items)
     }

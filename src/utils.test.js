@@ -9,6 +9,8 @@ const { convertTypeToGraph, getPages, cda, graphql } = require('./utils')
 //   })
 // })
 
+const failedMsg = (num = 3) => `Contentful CDA unreachable after ${num} retries. Please check your internet connection or the Contentful status page.`
+
 describe('utils', () => {
   test('convertTypeToGraph', () => {
     expect(convertTypeToGraph('test')).toBe('Test')
@@ -29,7 +31,7 @@ describe('utils', () => {
   describe('cda', () => {
     // let mock
     beforeEach(() => {
-      // fetch.mockClear()
+      // nothing yet...
     })
 
     test('regular request', async () => {
@@ -89,6 +91,57 @@ describe('utils', () => {
       expect(res.total).toBe(5000)
       expect(res.items.length).toBe(limit)
       expect(res.items[0].fields.index).toBe(skip)
+    })
+
+    describe('Retry System', () => {
+      /*
+        - Success with 0
+        - Success with 1
+        - Fail with 0
+        - Fail with 1
+        - Success after 2 failed attempts (retry=3)
+      */
+      test('retry: 0, fails: 0 - Success', async () => {
+        global.failRate = 0
+        await expect(cda({}, { retry: 0 })).resolves
+        global.failRate = 0
+      })
+      test('retry: 1, fails: 1 - Success', async () => {
+        global.failRate = 0
+        await expect(cda({}, { retry: 0 })).resolves
+        global.failRate = 0
+      })
+
+      test('retry: 0, fails: 1 - Success', async () => {
+        global.failRate = 1
+        await expect(cda({}, { retry: 1 })).resolves
+        global.failRate = 0
+      })
+
+      test('retry: default (3), fails: 1 - Success', async () => {
+        global.failRate = 1
+        await expect(cda({}, {})).resolves
+        global.failRate = 0
+      })
+
+      test('retry: 0, fails: 1 - Fails', async () => {
+        global.failRate = 1
+        await expect(cda({}, { retry: 0 })).rejects.toThrow(failedMsg(0))
+        global.failRate = 0
+      })
+
+      test('retry: 1, fails: 2 - Fails', async () => {
+        global.failRate = 2
+        await expect(cda({}, { retry: 1 })).rejects.toThrow(failedMsg(1))
+        global.failRate = 0
+      })
+
+      test('retry: default (3), fails: 5 - Fails', async () => {
+        global.failRate = 5
+        await expect(cda({}, { })).rejects.toThrow(failedMsg())
+        global.failRate = 0
+      })
+
     })
   })
 

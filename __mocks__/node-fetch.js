@@ -14,11 +14,22 @@ const createRandomCdaEntry = (index) => ({
 const db = Array(5000).fill().map((_, idx) => createRandomCdaEntry(idx))
 
 const normalizedResponse = (ret) => Promise.resolve({
+  status: 200,
   json: () => ret
 })
 
 module.exports = (url, opts = {}) => {
   const isGraphql = url.includes('graph')
+
+  if (global.failRate) {
+    global.failRate--
+    return {
+      status: 429,
+      headers: {
+        get: () => '300'
+      }
+    }
+  }
 
   if (isGraphql) {
     const theQuery = JSON.parse(opts.body).query
