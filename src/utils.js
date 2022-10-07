@@ -1,6 +1,21 @@
 const fetch = require('node-fetch')
 const CONFIG = require('./config')
 
+// generic contentful request wrapper (for retries)
+const request = async (fn, opts = {}) => {
+  const { retry } = opts
+  for (let i = 0; i <= retry; i++) {
+    const r = await fn()
+    if (r.status === 429) {
+      // fallback to 200 ms
+      const wait = parseInt(r.headers.get('x-contentful-ratelimit-reset')) || 200
+      await new Promise(resolve => setTimeout(resolve, wait + 1))
+    } else {
+      return r.json()
+    }
+  }
+}
+
 /**
  * Makes a CDA request to contentful
  * @param {String} url - The URL for the request
@@ -10,15 +25,9 @@ const CONFIG = require('./config')
 module.exports.cda = async (params = {}, opts = {}) => {
   const { isPreview, space, env, key, retry = CONFIG.retry, failSilent } = opts
   const queryStr = Object.keys(params).map(key => `${key}=${params[key]}`).join('&')
-  for (let i = 0; i <= retry; i++) {
-    const r = await fetch(`https://${isPreview ? 'preview' : 'cdn'}.contentful.com/spaces/${space}/environments/${env}/entries?access_token=${key}&${queryStr}`)
-    if (r.status === 429) {
-      // fallback to 200 ms
-      const wait = parseInt(r.headers.get('x-contentful-ratelimit-reset')) || 200
-      await new Promise(resolve => setTimeout(resolve, wait + 1))
-    } else {
-      return r.json()
-    }
+  const r = await request(() => fetch(`https://${isPreview ? 'preview' : 'cdn'}.contentful.com/spaces/${space}/environments/${env}/entries?access_token=${key}&${queryStr}`), { retry })
+  if (r) {
+    return r
   }
 
   // never worked, fail
@@ -41,15 +50,16 @@ module.exports.cda = async (params = {}, opts = {}) => {
  * @returns
  */
 module.exports.graphql = async (query = '', opts = {}) => {
-  const { key, space, env } = opts
-  const res = await fetch(`https://graphql.contentful.com/content/v1/spaces/${space}/environments/${env}`, {
+  const { key, space, env, retry = CONFIG.retry } = opts
+
+  const res = await request(() => fetch(`https://graphql.contentful.com/content/v1/spaces/${space}/environments/${env}`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${key}`
     },
     body: JSON.stringify({ query })
-  }).then(r => r.json())
+  }), { retry })
 
   return res
 }
