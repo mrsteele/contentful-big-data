@@ -1,4 +1,6 @@
 const { convertTypeToGraph, getPages, cda, graphql } = require('./utils')
+const { retryError } = require('./error')
+const CONFIG = require('./config')
 
 // jest.mock('node-fetch', () => {
 //   return jest.fn().mockImplementation((url) => {
@@ -8,8 +10,6 @@ const { convertTypeToGraph, getPages, cda, graphql } = require('./utils')
 //     })
 //   })
 // })
-
-const failedMsg = (num = 3) => `Contentful CDA unreachable after ${num} retries. Please check your internet connection or the Contentful status page.`
 
 describe('utils', () => {
   test('convertTypeToGraph', () => {
@@ -126,17 +126,17 @@ describe('utils', () => {
 
       test('retry: 0, fails: 1 - Fails', async () => {
         global.failRate = 1
-        await expect(cda({}, { retry: 0 })).rejects.toThrow(failedMsg(0))
+        await expect(cda({}, { retry: 0 })).rejects.toThrow(retryError(0))
       })
 
       test('retry: 1, fails: 2 - Fails', async () => {
         global.failRate = 2
-        await expect(cda({}, { retry: 1 })).rejects.toThrow(failedMsg(1))
+        await expect(cda({}, { retry: 1 })).rejects.toThrow(retryError(1))
       })
 
       test('retry: default (3), fails: 5 - Fails', async () => {
         global.failRate = 5
-        await expect(cda({}, { })).rejects.toThrow(failedMsg())
+        await expect(cda({}, { })).rejects.toThrow(retryError(CONFIG.retry))
       })
 
       test('fail silently', async () => {
@@ -148,21 +148,31 @@ describe('utils', () => {
   })
 
   describe('graphql', () => {
-    test('default response', async () => {
-      const query = `query {
-        pageCollection(where: {
-          sys: {
-            id_in: ["abc123"]
-          }
-        }) {
-          items {
-            title
-          }
+    const query = `query {
+      pageCollection(where: {
+        sys: {
+          id_in: ["abc123"]
         }
-      }`
-      const res = await graphql(query, {})
+      }) {
+        items {
+          title
+        }
+      }
+    }`
 
+    test('default response', async () => {
+      const res = await graphql(query, {})
       expect(res.data.pageCollection.items.length).toBe(1)
+    })
+
+    test('(redundant) retry: default (3), fails: 1 - Success', async () => {
+      global.failRate = 1
+      await expect(graphql(query, {})).resolves
+    })
+
+    test('(redundant) retry: 0, fails: 1 - Fails', async () => {
+      global.failRate = 1
+      await expect(graphql(query, { retry: 0 })).rejects.toThrow(retryError(0))
     })
   })
 })

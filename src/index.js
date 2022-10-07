@@ -1,5 +1,6 @@
 /* eslint-disable camelcase */
 const { cda, graphql, getPages } = require('./utils')
+const { spaceKeyError, contentTypeError } = require('./error')
 const CONFIG = require('./config')
 
 class Client {
@@ -15,7 +16,7 @@ class Client {
     // basic error handling...
     const { space, key, previewKey } = this.config
     if (!space || (!key && !previewKey)) {
-      throw new Error('"space" and at least "key" or "previewKey" are required.')
+      throw new Error(spaceKeyError)
     }
   }
 
@@ -27,7 +28,7 @@ class Client {
 
     // Error handlings
     if (!content_type) {
-      throw new Error('The "content_type" property is required.')
+      throw new Error(contentTypeError)
     }
 
     // get your "common" url

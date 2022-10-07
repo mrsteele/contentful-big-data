@@ -1,4 +1,5 @@
 // mocking the service
+const utils = require('../src/utils')
 
 /*
 `https://${isPreview ? 'preview' : 'cdn'}.contentful.com/spaces/${space}/environments/${env}/entries?access_token=${actualKey}&select=sys.id&include=0&${queryStr}`
@@ -34,10 +35,7 @@ module.exports = (url, opts = {}) => {
 
   if (isGraphql) {
     const theQuery = JSON.parse(opts.body).query
-    const query = theQuery.replace(/\s/g, ' ')
-    const name = query.split('Collection')[0].split(' ').pop() + 'Collection'
-    const stuff = query.split('[')[1].split(']')[0].split('\\"').join('"')
-    const ids = JSON.parse(`[${stuff}]`)
+    const { name, ids } = utils.parseQuery(theQuery)
 
     // data[queryName].items
     return normalizedResponse({

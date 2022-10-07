@@ -108,7 +108,7 @@ cbd.fetch(filters={}, selectors='', options={})
 * **selectors** - Please adhere to the [Contentful GraphQL API](https://www.contentful.com/developers/docs/references/graphql/) to determine how your query should be formatted. We always do a `Collection` request, just wrap your schema in curly braces.
 * **options** - These are ours. Currently we support the following
   * **isPreview** (Bool) - If `true`, will use the `previewKey` and access the preview API for both the CDA and GraphQL services.
-  * **retry** (Number) - If set, this number will be used at retry attempts.
+  * **retry** (Number) - If set, this number will be used at retry attempts. Default retry attempts is `3` but depends on your use-case and how many other services are hitting Contentful APIs at the same time.
   * **verbose** (Bool) - If `true`, we will return the full GraphQL response object, otherwise we only return the array of results.
 
 ## References

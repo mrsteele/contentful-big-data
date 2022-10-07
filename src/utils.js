@@ -1,5 +1,6 @@
 const fetch = require('node-fetch')
 const CONFIG = require('./config')
+const { retryError } = require('./error')
 
 // generic contentful request wrapper (for retries)
 const request = async (fn, opts = {}) => {
@@ -14,6 +15,14 @@ const request = async (fn, opts = {}) => {
       return r.json()
     }
   }
+}
+
+const parseQuery = (theQuery) => {
+  const query = theQuery.replace(/\s/g, ' ')
+  const name = query.split('Collection')[0].split(' ').pop() + 'Collection'
+  const stuff = query.split('[')[1].split(']')[0].split('\\"').join('"')
+  const ids = JSON.parse(`[${stuff}]`)
+  return { name, ids }
 }
 
 /**
@@ -40,7 +49,7 @@ module.exports.cda = async (params = {}, opts = {}) => {
     }
   }
 
-  throw new Error(`Contentful CDA unreachable after ${retry} retries. Please check your internet connection or the Contentful status page.`)
+  throw new Error(retryError(retry))
 }
 
 /**
@@ -50,7 +59,7 @@ module.exports.cda = async (params = {}, opts = {}) => {
  * @returns
  */
 module.exports.graphql = async (query = '', opts = {}) => {
-  const { key, space, env, retry = CONFIG.retry } = opts
+  const { key, space, env, retry = CONFIG.retry, failSilent } = opts
 
   const res = await request(() => fetch(`https://graphql.contentful.com/content/v1/spaces/${space}/environments/${env}`, {
     method: 'POST',
@@ -61,7 +70,25 @@ module.exports.graphql = async (query = '', opts = {}) => {
     body: JSON.stringify({ query })
   }), { retry })
 
-  return res
+  // success
+  if (res) {
+    return res
+  }
+
+  // fail silent
+  if (failSilent) {
+    const queryName = parseQuery(query).name
+    return {
+      data: {
+        [queryName]: {
+          items: []
+        }
+      }
+    }
+  }
+
+  // fail
+  throw new Error(retryError(retry))
 }
 
 module.exports.getPages = ({ skip = 0, limit, total, max }) => {
@@ -73,6 +100,8 @@ module.exports.getPages = ({ skip = 0, limit, total, max }) => {
   const resultSize = limit && realTotal > limit ? limit : realTotal
   return Math.ceil((resultSize) / max)
 }
+
+module.exports.parseQuery = parseQuery
 
 /**
  * Converts the name to the GraphQL name.
