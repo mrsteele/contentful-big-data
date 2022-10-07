@@ -167,7 +167,7 @@ describe('CBD', () => {
       expect(cdaSpy).toHaveBeenCalled()
       const lastArgs = cdaSpy.mock.calls[cdaSpy.mock.calls.length - 1]
       expect(lastArgs[1].retry).toBeFalsy()
-      await cbd.fetch({ content_type: 'a' }, ``, { retry: 1 })
+      await cbd.fetch({ content_type: 'a' }, '', { retry: 1 })
       const lastArgs2 = cdaSpy.mock.calls[cdaSpy.mock.calls.length - 1]
       expect(lastArgs2[1].retry).toBe(1)
     })
