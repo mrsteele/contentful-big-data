@@ -1,6 +1,7 @@
 // @NOTE - cdaSpyOn BEFORE the dependent imports
 const all = require('./utils')
 const cdaSpy = jest.spyOn(all, 'cda')
+const graphqlSpy = jest.spyOn(all, 'graphql')
 
 // now we can safely call this
 const CBD = require('.')
@@ -51,8 +52,11 @@ describe('CBD', () => {
       const cbd = CBD({ key: 'a', space: 'a', retry: 1 })
       await cbd.fetch({ content_type: 'a' })
       expect(cdaSpy).toHaveBeenCalled()
-      const lastArgs = cdaSpy.mock.calls[cdaSpy.mock.calls.length - 1]
-      expect(lastArgs[1].retry).toBe(1)
+      expect(graphqlSpy).toHaveBeenCalled()
+      const cdaArgs = cdaSpy.mock.calls[cdaSpy.mock.calls.length - 1]
+      expect(cdaArgs[1].retry).toBe(1)
+      const graphqlArgs = graphqlSpy.mock.calls[graphqlSpy.mock.calls.length - 1]
+      expect(graphqlArgs[1].retry).toBe(1)
     })
   })
 
@@ -164,12 +168,19 @@ describe('CBD', () => {
 
     test('retry feature overrides on fetch request', async () => {
       await cbd.fetch({ content_type: 'a' })
+      // were they called?
       expect(cdaSpy).toHaveBeenCalled()
-      const lastArgs = cdaSpy.mock.calls[cdaSpy.mock.calls.length - 1]
-      expect(lastArgs[1].retry).toBeFalsy()
+      expect(graphqlSpy).toHaveBeenCalled()
+      // were the args right?
+      const cdaArgs = cdaSpy.mock.calls[cdaSpy.mock.calls.length - 1]
+      const graphqlArgs = graphqlSpy.mock.calls[graphqlSpy.mock.calls.length - 1]
+      expect(cdaArgs[1].retry).toBeFalsy()
+      expect(graphqlArgs[1].retry).toBeFalsy()
       await cbd.fetch({ content_type: 'a' }, '', { retry: 1 })
-      const lastArgs2 = cdaSpy.mock.calls[cdaSpy.mock.calls.length - 1]
-      expect(lastArgs2[1].retry).toBe(1)
+      const cdaArgs2 = cdaSpy.mock.calls[cdaSpy.mock.calls.length - 1]
+      const graphqlArgs2 = graphqlSpy.mock.calls[graphqlSpy.mock.calls.length - 1]
+      expect(cdaArgs2[1].retry).toBe(1)
+      expect(graphqlArgs2[1].retry).toBe(1)
     })
   })
 })
