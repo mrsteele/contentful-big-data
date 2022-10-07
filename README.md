@@ -15,7 +15,7 @@ This module is used to wrap around Contentful's CDA and GraphQL to make the most
 
 ### Disclaimers
 
-1. I do not work for Contentful. I am a developer who professionally and personally use the service and this is something I was seeing as a "missing link" to get the services to work right.
+1. I do not work for Contentful. I am a developer who professionally and personally use the service and this is something I was seeing as a "missing link" to get the data in its entirety.
 2. Use at your own risk. Contentful has limitations on how many API requests you can do in any given period. If you are charged for overages I recommend you pay attention to how you use this tool as it is meant to do a lot of queries.
 
 ## Usage
