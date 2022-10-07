@@ -36,8 +36,7 @@ class Client {
       ...queryRest,
       content_type,
       select: 'sys.id', // only need the ids
-      include: 0, // only need the root entry
-      retry: retryOpts ?? retry
+      include: 0 // only need the root entry
     }
 
     const commonOpts = {
@@ -45,7 +44,7 @@ class Client {
       space,
       env,
       key: isPreview ? previewKey : key,
-      retry
+      retry: retryOpts ?? retry
     }
 
     // figure out how many pages you need

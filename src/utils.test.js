@@ -94,6 +94,10 @@ describe('utils', () => {
     })
 
     describe('Retry System', () => {
+      beforeEach(() => {
+        global.failRate = 0
+      })
+
       /*
         - Success with 0
         - Success with 1
@@ -104,42 +108,35 @@ describe('utils', () => {
       test('retry: 0, fails: 0 - Success', async () => {
         global.failRate = 0
         await expect(cda({}, { retry: 0 })).resolves
-        global.failRate = 0
       })
       test('retry: 1, fails: 1 - Success', async () => {
         global.failRate = 0
         await expect(cda({}, { retry: 0 })).resolves
-        global.failRate = 0
       })
 
       test('retry: 0, fails: 1 - Success', async () => {
         global.failRate = 1
         await expect(cda({}, { retry: 1 })).resolves
-        global.failRate = 0
       })
 
       test('retry: default (3), fails: 1 - Success', async () => {
         global.failRate = 1
         await expect(cda({}, {})).resolves
-        global.failRate = 0
       })
 
       test('retry: 0, fails: 1 - Fails', async () => {
         global.failRate = 1
         await expect(cda({}, { retry: 0 })).rejects.toThrow(failedMsg(0))
-        global.failRate = 0
       })
 
       test('retry: 1, fails: 2 - Fails', async () => {
         global.failRate = 2
         await expect(cda({}, { retry: 1 })).rejects.toThrow(failedMsg(1))
-        global.failRate = 0
       })
 
       test('retry: default (3), fails: 5 - Fails', async () => {
         global.failRate = 5
         await expect(cda({}, { })).rejects.toThrow(failedMsg())
-        global.failRate = 0
       })
 
       test('fail silently', async () => {

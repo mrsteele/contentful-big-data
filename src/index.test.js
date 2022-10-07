@@ -1,6 +1,6 @@
-// @NOTE - spyOn BEFORE the dependent imports
+// @NOTE - cdaSpyOn BEFORE the dependent imports
 const all = require('./utils')
-const spy = jest.spyOn(all, 'cda')
+const cdaSpy = jest.spyOn(all, 'cda')
 
 // now we can safely call this
 const CBD = require('.')
@@ -8,7 +8,7 @@ const CBD = require('.')
 const CBDConstructorErrorStr = '"space" and at least "key" or "previewKey" are required.'
 
 afterEach(() => {
-  // restore the spy created with spyOn
+  // restore the cdaSpy created with spyOn
   jest.restoreAllMocks()
 })
 
@@ -45,6 +45,14 @@ describe('CBD', () => {
 
     test('constructor success with space and previewKey', () => {
       expect(() => CBD({ space: 'a', previewKey: 'a' })).not.toThrow(CBDConstructorErrorStr)
+    })
+
+    test('retry feature propogates down to the fetch request', async () => {
+      const cbd = CBD({ key: 'a', space: 'a', retry: 1 })
+      await cbd.fetch({ content_type: 'a' })
+      expect(cdaSpy).toHaveBeenCalled()
+      const lastArgs = cdaSpy.mock.calls[cdaSpy.mock.calls.length - 1]
+      expect(lastArgs[1].retry).toBe(1)
     })
   })
 
@@ -93,9 +101,9 @@ describe('CBD', () => {
         title
       }`)
       expect(results.length).toBe(5000)
-      expect(spy).toHaveBeenCalled()
+      expect(cdaSpy).toHaveBeenCalled()
 
-      const lastArgs = spy.mock.calls[spy.mock.calls.length - 1]
+      const lastArgs = cdaSpy.mock.calls[cdaSpy.mock.calls.length - 1]
       expect(lastArgs[0].select).toBe('sys.id')
       expect(lastArgs[1].isPreview).toBeFalsy()
       expect(lastArgs[1].key).toBe('keyHere')
@@ -107,9 +115,9 @@ describe('CBD', () => {
         title
       }`)
       expect(results.length).toBe(5000)
-      expect(spy).toHaveBeenCalled()
+      expect(cdaSpy).toHaveBeenCalled()
 
-      const lastArgs = spy.mock.calls[spy.mock.calls.length - 1]
+      const lastArgs = cdaSpy.mock.calls[cdaSpy.mock.calls.length - 1]
       expect(lastArgs[0]['fields.test']).toBe('ok')
     })
 
@@ -120,9 +128,9 @@ describe('CBD', () => {
         isPreview: true
       })
       expect(results.length).toBe(5000)
-      expect(spy).toHaveBeenCalled()
+      expect(cdaSpy).toHaveBeenCalled()
 
-      const lastArgs = spy.mock.calls[spy.mock.calls.length - 1]
+      const lastArgs = cdaSpy.mock.calls[cdaSpy.mock.calls.length - 1]
       expect(lastArgs[1].isPreview).toBe(true)
       expect(lastArgs[1].key).toBe('previewKeyHere')
     })
@@ -139,9 +147,9 @@ describe('CBD', () => {
         title
       }`)
       expect(results.length).toBe(5000)
-      expect(spy).toHaveBeenCalled()
+      expect(cdaSpy).toHaveBeenCalled()
 
-      const lastArgs = spy.mock.calls[spy.mock.calls.length - 1]
+      const lastArgs = cdaSpy.mock.calls[cdaSpy.mock.calls.length - 1]
       expect(lastArgs[1].env).toBe('envHere')
     })
 
@@ -152,6 +160,16 @@ describe('CBD', () => {
         verbose: true
       })
       expect(results.data.tCollection.items.length).toBe(5000)
+    })
+
+    test('retry feature overrides on fetch request', async () => {
+      await cbd.fetch({ content_type: 'a' })
+      expect(cdaSpy).toHaveBeenCalled()
+      const lastArgs = cdaSpy.mock.calls[cdaSpy.mock.calls.length - 1]
+      expect(lastArgs[1].retry).toBeFalsy()
+      await cbd.fetch({ content_type: 'a' }, ``, { retry: 1 })
+      const lastArgs2 = cdaSpy.mock.calls[cdaSpy.mock.calls.length - 1]
+      expect(lastArgs2[1].retry).toBe(1)
     })
   })
 })
