@@ -24,11 +24,8 @@ import CBD from 'contentful-big-data'
 // const CBD = require('contentful-big-data')
 
 const cbd = CBD({
-  space: 'space-id-here', // (required)
-  key: 'space-key-here', // (possibly required)
-  previewKey: 'preview-key-here', // (possibly required)
-  env: 'env', // (optional, defaults to 'master')
-  retry: 3 //  (optional, defaults to 3)
+  space: 'space-id-here'
+  key: 'space-key-here'
 })
 
 const results = await cbd.fetch({
@@ -100,16 +97,47 @@ const linkedPages = await cbd.fetch({
 
 ## Docs
 
+### CBD (constructor)
+
 ```js
-cbd.fetch(filters={}, selectors='', options={})
+const cbd = CBD(config={
+  space: 'space-id-here', // (required) - Your space id in Contentful
+  key: 'space-key-here', // (possibly required) - Your api access key to your Contentful space
+  previewKey: 'preview-key-here', // (possibly required) - Your preview api access key to your Contentful space
+  env: 'master', // (optional) - Your Contentful env. Defaults to `master`
+  retry: 3, //  (optional) - The amount of retries after hitting the rate limiter for all requests. Defaults to `3`.
+  failSilently: false // (optional) - If you want your requests to fail silently or throw an error. Defaults to false (and throws errors).
+})
 ```
 
-* **filters** - Please refer to the [Content Delivery API](https://www.contentful.com/developers/docs/references/content-delivery-api/) to look up all the properties. This library adheres to all of them, but will ignore the `select` property because we opt to use the GraphQL selectors for more granularity. Note that the `content_type` property is required due to limitations with Contentful.
-* **selectors** - Please adhere to the [Contentful GraphQL API](https://www.contentful.com/developers/docs/references/graphql/) to determine how your query should be formatted. We always do a `Collection` request, just wrap your schema in curly braces.
-* **options** - These are ours. Currently we support the following
-  * **isPreview** (Bool) - If `true`, will use the `previewKey` and access the preview API for both the CDA and GraphQL services.
-  * **retry** (Number) - If set, this number will be used at retry attempts. Default retry attempts is `3` but depends on your use-case and how many other services are hitting Contentful APIs at the same time.
-  * **verbose** (Bool) - If `true`, we will return the full GraphQL response object, otherwise we only return the array of results.
+> Note - You can populate both `key` and `previewKey` but if you only plan to use the tool for one purpose, only one key is required.
+
+### CBD.fetch
+
+```js
+// filters, selectors, and options
+cbd.fetch(
+  // filters - Please refer to the [Content Delivery API](https://www.contentful.com/developers/docs/references/content-delivery-api/) to look up all the properties. This library adheres to all of them, but will ignore the `select` property because we opt to use the GraphQL selectors for more granularity. Note that the `content_type` property is required due to limitations with Contentful.
+{
+  custom: 'see below'
+},
+// selectors - Please adhere to the [Contentful GraphQL API](https://www.contentful.com/developers/docs/references/graphql/) to determine how your query should be formatted. We always do a `Collection` request, just wrap your schema in curly braces.
+`{
+  fields
+  goHere
+  graphQL {
+    entries
+  }
+  seeSelectorsBelow
+}`,
+// options - Comments below...
+{
+  isPreview: false, // (optional) - If `true`, will use the `previewKey` and access the preview API for both the CDA and GraphQL services.
+  retry: 3, // (optional) - If set, this number will be used at retry attempts. Default retry attempts is `3` but depends on your use-case and how many other services are hitting Contentful APIs at the same time.
+  verbose: false, // If `true`, we will return the full GraphQL response object, otherwise we only return the array of results.
+  failSilently: false, // (optional) - If `true`, this will not throw any errors when requests fail.
+})
+```
 
 ## References
 

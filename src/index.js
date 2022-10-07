@@ -21,8 +21,8 @@ class Client {
   }
 
   async fetch (query, select, opts = {}) {
-    const { space, key, previewKey, env, retry } = this.config
-    const { isPreview, verbose, retry: retryOpts } = opts
+    const { space, key, previewKey, env, retry, failSilently } = this.config
+    const { isPreview, verbose, retry: retryOpts, failSilently: failSilentlyOpts } = opts
     // pull out select (not used here)
     const { content_type, skip = 0, limit = 0, ...queryRest } = query
 
@@ -45,7 +45,8 @@ class Client {
       space,
       env,
       key: isPreview ? previewKey : key,
-      retry: retryOpts ?? retry
+      retry: retryOpts ?? retry,
+      failSilently: failSilentlyOpts ?? failSilently
     }
 
     // figure out how many pages you need
