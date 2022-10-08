@@ -141,7 +141,7 @@ describe('utils', () => {
 
       test('fail silently', async () => {
         global.failRate = 1
-        const res = await cda({}, { retry: 0, failSilent: true })
+        const res = await cda({}, { retry: 0, failSilently: true })
         expect(res).toStrictEqual({ total: 0, limit: 0, skip: 0, items: [] })
       })
     })

@@ -32,7 +32,7 @@ const parseQuery = (theQuery) => {
  * @returns
  */
 module.exports.cda = async (params = {}, opts = {}) => {
-  const { isPreview, space, env, key, retry = CONFIG.retry, failSilent } = opts
+  const { isPreview, space, env, key, retry = CONFIG.retry, failSilently } = opts
   const queryStr = Object.keys(params).map(key => `${key}=${params[key]}`).join('&')
   const r = await request(() => fetch(`https://${isPreview ? 'preview' : 'cdn'}.contentful.com/spaces/${space}/environments/${env}/entries?access_token=${key}&${queryStr}`), { retry })
   if (r) {
@@ -40,7 +40,7 @@ module.exports.cda = async (params = {}, opts = {}) => {
   }
 
   // never worked, fail
-  if (failSilent) {
+  if (failSilently) {
     return {
       total: 0,
       limit: 0,
@@ -59,7 +59,7 @@ module.exports.cda = async (params = {}, opts = {}) => {
  * @returns
  */
 module.exports.graphql = async (query = '', opts = {}) => {
-  const { key, space, env, retry = CONFIG.retry, failSilent } = opts
+  const { key, space, env, retry = CONFIG.retry, failSilently } = opts
 
   const res = await request(() => fetch(`https://graphql.contentful.com/content/v1/spaces/${space}/environments/${env}`, {
     method: 'POST',
@@ -76,7 +76,7 @@ module.exports.graphql = async (query = '', opts = {}) => {
   }
 
   // fail silent
-  if (failSilent) {
+  if (failSilently) {
     const queryName = parseQuery(query).name
     return {
       data: {
