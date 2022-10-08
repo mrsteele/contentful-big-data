@@ -1,4 +1,5 @@
 // mocking the service
+const utils = require('../src/utils')
 
 /*
 `https://${isPreview ? 'preview' : 'cdn'}.contentful.com/spaces/${space}/environments/${env}/entries?access_token=${actualKey}&select=sys.id&include=0&${queryStr}`
@@ -14,18 +15,27 @@ const createRandomCdaEntry = (index) => ({
 const db = Array(5000).fill().map((_, idx) => createRandomCdaEntry(idx))
 
 const normalizedResponse = (ret) => Promise.resolve({
+  status: 200,
   json: () => ret
 })
 
 module.exports = (url, opts = {}) => {
   const isGraphql = url.includes('graph')
 
+  if (global.failRate) {
+    global.failRate--
+    return {
+      status: 429,
+      headers: {
+        // just return 1 ms
+        get: () => '1'
+      }
+    }
+  }
+
   if (isGraphql) {
     const theQuery = JSON.parse(opts.body).query
-    const query = theQuery.replace(/\s/g, ' ')
-    const name = query.split('Collection')[0].split(' ').pop() + 'Collection'
-    const stuff = query.split('[')[1].split(']')[0].split('\\"').join('"')
-    const ids = JSON.parse(`[${stuff}]`)
+    const { name, ids } = utils.parseQuery(theQuery)
 
     // data[queryName].items
     return normalizedResponse({

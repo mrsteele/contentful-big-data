@@ -1,4 +1,29 @@
 const fetch = require('node-fetch')
+const CONFIG = require('./config')
+const { retryError } = require('./error')
+
+// generic contentful request wrapper (for retries)
+const request = async (fn, opts = {}) => {
+  const { retry } = opts
+  for (let i = 0; i <= retry; i++) {
+    const r = await fn()
+    if (r.status === 429) {
+      // fallback to 200 ms
+      const wait = parseInt(r.headers.get('x-contentful-ratelimit-reset')) || 200
+      await new Promise(resolve => setTimeout(resolve, wait + 1))
+    } else {
+      return r.json()
+    }
+  }
+}
+
+const parseQuery = (theQuery) => {
+  const query = theQuery.replace(/\s/g, ' ')
+  const name = query.split('Collection')[0].split(' ').pop() + 'Collection'
+  const stuff = query.split('[')[1].split(']')[0].split('\\"').join('"')
+  const ids = JSON.parse(`[${stuff}]`)
+  return { name, ids }
+}
 
 /**
  * Makes a CDA request to contentful
@@ -7,10 +32,24 @@ const fetch = require('node-fetch')
  * @returns
  */
 module.exports.cda = async (params = {}, opts = {}) => {
-  const { isPreview, space, env, key } = opts
+  const { isPreview, space, env, key, retry = CONFIG.retry, failSilently } = opts
   const queryStr = Object.keys(params).map(key => `${key}=${params[key]}`).join('&')
-  const res = await fetch(`https://${isPreview ? 'preview' : 'cdn'}.contentful.com/spaces/${space}/environments/${env}/entries?access_token=${key}&${queryStr}`).then(r => r.json())
-  return res
+  const r = await request(() => fetch(`https://${isPreview ? 'preview' : 'cdn'}.contentful.com/spaces/${space}/environments/${env}/entries?access_token=${key}&${queryStr}`), { retry })
+  if (r) {
+    return r
+  }
+
+  // never worked, fail
+  if (failSilently) {
+    return {
+      total: 0,
+      limit: 0,
+      skip: 0,
+      items: []
+    }
+  }
+
+  throw new Error(retryError(retry))
 }
 
 /**
@@ -20,17 +59,36 @@ module.exports.cda = async (params = {}, opts = {}) => {
  * @returns
  */
 module.exports.graphql = async (query = '', opts = {}) => {
-  const { key, space, env } = opts
-  const res = await fetch(`https://graphql.contentful.com/content/v1/spaces/${space}/environments/${env}`, {
+  const { key, space, env, retry = CONFIG.retry, failSilently } = opts
+
+  const res = await request(() => fetch(`https://graphql.contentful.com/content/v1/spaces/${space}/environments/${env}`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${key}`
     },
     body: JSON.stringify({ query })
-  }).then(r => r.json())
+  }), { retry })
 
-  return res
+  // success
+  if (res) {
+    return res
+  }
+
+  // fail silent
+  if (failSilently) {
+    const queryName = parseQuery(query).name
+    return {
+      data: {
+        [queryName]: {
+          items: []
+        }
+      }
+    }
+  }
+
+  // fail
+  throw new Error(retryError(retry))
 }
 
 module.exports.getPages = ({ skip = 0, limit, total, max }) => {
@@ -42,6 +100,8 @@ module.exports.getPages = ({ skip = 0, limit, total, max }) => {
   const resultSize = limit && realTotal > limit ? limit : realTotal
   return Math.ceil((resultSize) / max)
 }
+
+module.exports.parseQuery = parseQuery
 
 /**
  * Converts the name to the GraphQL name.

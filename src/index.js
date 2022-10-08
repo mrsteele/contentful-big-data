@@ -1,9 +1,7 @@
 /* eslint-disable camelcase */
 const { cda, graphql, getPages } = require('./utils')
-
-// some globals
-// limit from Contentful
-const CDA_MAX = 1000
+const { spaceKeyError, contentTypeError } = require('./error')
+const CONFIG = require('./config')
 
 class Client {
   constructor (config = {}) {
@@ -18,19 +16,19 @@ class Client {
     // basic error handling...
     const { space, key, previewKey } = this.config
     if (!space || (!key && !previewKey)) {
-      throw new Error('"space" and at least "key" or "previewKey" are required.')
+      throw new Error(spaceKeyError)
     }
   }
 
   async fetch (query, select, opts = {}) {
-    const { space, key, previewKey, env } = this.config
-    const { isPreview, verbose } = opts
+    const { space, key, previewKey, env, retry, failSilently } = this.config
+    const { isPreview, verbose, retry: retryOpts, failSilently: failSilentlyOpts } = opts
     // pull out select (not used here)
     const { content_type, skip = 0, limit = 0, ...queryRest } = query
 
     // Error handlings
     if (!content_type) {
-      throw new Error('The "content_type" property is required.')
+      throw new Error(contentTypeError)
     }
 
     // get your "common" url
@@ -46,7 +44,9 @@ class Client {
       isPreview,
       space,
       env,
-      key: isPreview ? previewKey : key
+      key: isPreview ? previewKey : key,
+      retry: retryOpts ?? retry,
+      failSilently: failSilentlyOpts ?? failSilently
     }
 
     // figure out how many pages you need
@@ -54,7 +54,7 @@ class Client {
     const aggregated = await cda({ ...commonProps, limit: 0 }, commonOpts)
     const { total } = aggregated
     // remove skip to offset the pages
-    const pages = getPages({ max: CDA_MAX, total, skip, limit })
+    const pages = getPages({ max: CONFIG.cdaMax, total, skip, limit })
 
     // setup the paginated placeholder
     // weird hack to just make it look correct
@@ -69,13 +69,11 @@ class Client {
       // 1: limit = 20
       // 2: limit = 20, skip = 20
       // 3: limit = 8, skip = 20
-      const tempSkip = skip + (i * CDA_MAX)
-      const tempLimit = limit && aggregated.items.length + CDA_MAX > limit ? limit - aggregated.items.length : CDA_MAX
+      const tempSkip = skip + (i * CONFIG.cdaMax)
+      const tempLimit = limit && aggregated.items.length + CONFIG.cdaMax > limit ? limit - aggregated.items.length : CONFIG.cdaMax
       const ret = await cda({ ...commonProps, limit: tempLimit, skip: tempSkip }, commonOpts)
       aggregated.items.push(...ret.items)
     }
-
-    // console.log('aggregated', aggregated)
 
     // finally, get the selected stuff with graphql
     const queryName = `${content_type}Collection`
